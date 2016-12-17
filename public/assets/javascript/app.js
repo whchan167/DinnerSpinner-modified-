@@ -141,7 +141,7 @@ function initMap() {
               $("#clickmap").hide();
 
               //clear all markers on the map
-              for (var i=0; i<markers.length; i++) {
+              for (var i=0; i<googleMarkers.length; i++) {
               googleMarker[i].setMap(null);
               }
 
