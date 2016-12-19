@@ -1,5 +1,7 @@
 //setting variables for wheels' color and type of restaurants
-var colors = ["#D2B48C","#89a075","#D2B48C","#89a075","#D2B48C","#89a075","#D2B48C","#89a075","#D2B48C","#89a075","#D2B48C","#89a075","#D2B48C"];
+var colors = ["#B8D430", "#3AB745", "#029990", "#3501CB",
+                 "#2E2C75", "#673A7E", "#CC0071", "#F80120",
+                 "#F35B20", "#FB9A00", "#FFCC00", "#FEF200"];
 
 var restaurants = ["Korean", "Indian", "Italian", "Sandwiches","Burgers", "Breakfast",
                    "Mexican", "Caribbean","Vietnamese", "Chinese",
@@ -113,6 +115,7 @@ var map;
 var service;
 var markers = [];
 var restmarkerinfo = [];
+var googlerestinfo = [];
 var googleMarker = []; // Added this to replace the functionality of markers
 //
 function initMap() {
@@ -141,8 +144,14 @@ function initMap() {
               $("#clickmap").hide();
 
               //clear all markers on the map
-              for (var i=0; i<googleMarkers.length; i++) {
+              for (var i=0; i<googleMarker.length; i++) {
               googleMarker[i].setMap(null);
+              };
+              for (var i=0; i<markers.length; i++) {
+              markers[i].setMap(null);
+              }
+              for (var i=0; i<restmarkerinfo.length; i++) {
+              restmarkerinfo.splice(0,3);
               }
 
               //the page will not refresh
@@ -156,13 +165,6 @@ function geocodeAddress(geocoder, resultsMap) {
             if (status === 'OK') {
             resultsMap.setCenter(results[0].geometry.location);
 
-            // Commented out this marker as its the search location
-            // And Makes it confusing when trying to see the info panels
-            // on other markers
-            //     marker = new google.maps.Marker({
-            //     map: resultsMap,
-            //     position: results[0].geometry.location
-            // });
           }
         });
       };
@@ -191,7 +193,7 @@ function yelpsearch(restaurant, location){
 
                 //create a div tag to store each restaurant data:
                 var restaurantDiv = $("<div class=restDiv>");
-
+              
                 //create rating image tag to store image
                 var ratingimage = $("<img>");
 
@@ -202,37 +204,60 @@ function yelpsearch(restaurant, location){
                 //create restaurant image tag to store image
                 var restaurantimage = $("<img class='resimage'>");
 
-
                 //set attribute to image tag
                 restaurantimage.attr("src", response.businesses[i].image_url);
 
-                //append the restuarant data to restaurant Div
-                restaurantDiv.append(restaurantimage);
+          //clone the same set of restaurant data. When click the marker, the infowindow displays data
+          //without making the data in the table disapper
 
+                //store the restaurant data in variable
+                var googname = $("<p>").text("Name: " + response.businesses[i].name);
+                var googaddress =$("<p>").text("Address: " + response.businesses[i].location.display_address);
+                var googphone = $("<p>").text("Phone: " + response.businesses[i].display_phone);
+
+                //create a div tag to store each restaurant data:
+                var googlerestDiv = $("<div class=restDiv>");
+
+                //create rating image tag to store image
+                var ratimage = $("<img>");
+
+                //set attribute to rating image tag
+                ratimage.attr("src", response.businesses[i].rating_img_url_small);
+                //find out in api if you can receive text for rating and create own star system
+
+                //create restaurant image tag to store image
+                var restimage = $("<img class='resimage'>");
+
+
+                //set attribute to image tag
+                restimage.attr("src", response.businesses[i].image_url);
+
+                //append the restuarant data to restaurant Div for the tablet display
+                restaurantDiv.append(restaurantimage);
                 restaurantDiv.append(ratingimage);
                 restaurantDiv.append(restname);
                 restaurantDiv.append(restaddress);
                 restaurantDiv.append(restphone);
 
+                //append the restaurant data to google map Div to display in marker
+                googlerestDiv.append(restimage);
+                googlerestDiv.append(ratimage);
+                googlerestDiv.append(googname);
+                googlerestDiv.append(googaddress);
+                googlerestDiv.append(googphone);
+
                 //prepend restaurantDiv to the restaurant list in html
                 $("#restauranttable").prepend(restaurantDiv);
                 $("#clickmap").html("<button><a href='#map'>Click to see the map</button>").show();
 
-                // Code commented out below has been moved to a new location
-
-                //markers to pinpoints all restuarant locations on the restaurant list.
-                // marker = new google.maps.Marker({
-                // position: {lat: response.businesses[i].location.coordinate.latitude, lng: response.businesses[i].location.coordinate.longitude},
-                // map: map
-                // });
-                //
+                // Create an array for making a new marker with restaurant infobox
 
                 var m = [restname + "," + restaddress,  response.businesses[i].location.coordinate.latitude, response.businesses[i].location.coordinate.longitude];
 
                 //push marker to the global markers array
                 markers.push(m);
-                restmarkerinfo.push(restaurantDiv[0]);
-
+                restmarkerinfo.push(googlerestDiv[0]);
+                
             } // Closes for loop
 
             // New For Loop to generate the markers - We push this
